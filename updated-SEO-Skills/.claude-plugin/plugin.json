@@ -1,0 +1,21 @@
+{
+  "name": "local-seo",
+  "description": "Local SEO, website generation and GEO suite for local and service-area businesses: Google Business Profile optimisation, review engine, scheduled GBP posts, local keyword clustering, Service x City pages with an anti-doorway gate, local blog posts, technical/GEO audit, GitHub + Vercel publishing and social syndication. Sits beside ai-seo-website-builder (the base site) and city-landing-pages.",
+  "version": "1.0.0",
+  "author": {
+    "name": "AfriShield",
+    "email": "hello@afrishieldai.com"
+  },
+  "homepage": "https://afrishieldai.com",
+  "keywords": [
+    "local-seo",
+    "google-business-profile",
+    "geo",
+    "generative-engine-optimization",
+    "reviews",
+    "service-area-pages",
+    "schema",
+    "nextjs",
+    "make-com"
+  ]
+}

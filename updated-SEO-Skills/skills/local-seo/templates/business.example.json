@@ -1,0 +1,45 @@
+{
+  "name": "TODO Business Name",
+  "legal_name": "",
+  "description": "TODO one or two plain sentences: what the business does, for whom, and where.",
+  "schema_type": "LocalBusiness",
+  "website": "https://example.com",
+  "phone": "+1-416-555-0100",
+  "phone_country_code": "1",
+  "expected_area_codes": ["416", "647", "437"],
+  "email": "",
+  "address": {
+    "street": "",
+    "locality": "Toronto",
+    "region": "ON",
+    "postal_code": "",
+    "country": "CA"
+  },
+  "service_area_business": true,
+  "hide_address": true,
+  "geo": { "lat": null, "lng": null },
+  "primary_metro": "Toronto, ON",
+  "country_code": "ca",
+  "language": "en",
+  "timezone": "America/Toronto",
+  "price_range": "$$",
+  "opening_hours": ["Mo-Fr 08:00-18:00", "Sa 09:00-14:00"],
+  "services": [
+    {
+      "slug": "drain-cleaning",
+      "name": "Drain Cleaning",
+      "keywords": ["clogged drain", "drain unclogging"],
+      "description": "TODO one sentence on what is included."
+    }
+  ],
+  "service_areas": ["Etobicoke, ON", "Mississauga, ON", "North York, ON"],
+  "competitors": [],
+  "gbp": {
+    "profile_url": "",
+    "review_link": "https://g.page/r/TODO/review",
+    "primary_category": "",
+    "secondary_categories": []
+  },
+  "citations": [],
+  "same_as": []
+}

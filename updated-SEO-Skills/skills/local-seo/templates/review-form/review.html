@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Rate your experience</title>
+<!--
+  Standalone review intake page. No build step, no dependencies: host this one
+  file anywhere (Vercel, Netlify, the client's existing site) and link to it
+  from review-request emails, texts and QR codes.
+
+  4-5 stars -> redirect to the Google review form.
+  1-3 stars -> private feedback form, POSTed to a Make.com webhook that alerts
+               the team in Slack.
+
+  Edit CONFIG below. The webhook URL is visible in page source here; if that
+  matters, use the Next.js version (app/api/review-feedback), which keeps it
+  on the server.
+-->
+<style>
+  :root { --ink: #0f172a; --muted: #475569; --line: #cbd5e1; --star: #fbbf24; --bg: #f8fafc; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px;
+         background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { width: 100%; max-width: 28rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+         padding: 32px; text-align: center; box-shadow: 0 10px 30px rgba(15, 23, 42, .08); }
+  h1 { margin: 0; font-size: 1.5rem; }
+  p { margin: 8px 0 0; color: var(--muted); }
+  .stars { display: flex; justify-content: center; gap: 4px; margin-top: 24px; }
+  .stars button { background: none; border: 0; padding: 0 2px; font-size: 2.5rem; line-height: 1; color: var(--line); cursor: pointer; }
+  .stars button.lit { color: var(--star); }
+  .stars button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+  form { text-align: left; margin-top: 24px; }
+  label { display: block; margin-top: 12px; font-size: .875rem; font-weight: 600; color: #334155; }
+  input, textarea { width: 100%; margin-top: 4px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+  .btn { display: inline-block; width: 100%; margin-top: 20px; padding: 12px 16px; border: 0; border-radius: 6px;
+         background: var(--ink); color: #fff; font: inherit; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; }
+  .btn[disabled] { opacity: .6; }
+  .small { font-size: .875rem; margin-top: 24px; }
+  .error { color: #b91c1c; font-size: .875rem; }
+  .hp { position: absolute; left: -9999px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>How did we do?</h1>
+  <p id="lead"></p>
+
+  <div class="stars" id="stars" role="radiogroup" aria-label="Star rating"></div>
+
+  <div id="happy" role="status" hidden>
+    <p style="margin-top:24px;color:var(--ink);font-weight:600">Thank you! Taking you to Google to share that…</p>
+    <a class="btn" id="google-button">Continue to Google</a>
+  </div>
+
+  <form id="feedback" hidden>
+    <p style="color:var(--ink)">We are sorry we fell short. Tell us what happened and a manager will follow up.</p>
+    <label>What went wrong?
+      <textarea name="feedback" rows="4" required></textarea>
+    </label>
+    <label>Your name
+      <input name="name" autocomplete="name">
+    </label>
+    <label>Phone or email, so we can put it right
+      <input name="contact">
+    </label>
+    <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" type="submit">Send to the manager</button>
+    <p class="error" id="error" role="alert" hidden>That did not send. Please try again.</p>
+  </form>
+
+  <p id="thanks" role="status" style="margin-top:24px;color:var(--ink);font-weight:600" hidden>
+    Thank you. Your feedback went straight to our manager.
+  </p>
+
+  <p class="small" id="public-link" hidden>Prefer to post publicly? <a id="google-link">Leave a Google review</a>.</p>
+</main>
+
+<script>
+  const CONFIG = {
+    businessName: 'TODO Business Name',
+    googleReviewUrl: 'https://g.page/r/TODO/review',
+    makeWebhookUrl: 'https://hook.make.com/TODO',
+    // Keep the Google link visible to low raters too. Google's review policy
+    // forbids selectively soliciting positive reviews; hiding the link from
+    // unhappy customers is exactly that.
+    publicLinkForAll: true,
+    redirectDelayMs: 1500,
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const LABELS = ['Poor', 'Fair', 'OK', 'Good', 'Excellent'];
+  let rating = 0;
+  let redirectTimer;
+
+  $('lead').textContent = `Rate your experience with ${CONFIG.businessName}.`;
+  $('google-button').href = $('google-link').href = CONFIG.googleReviewUrl;
+
+  const buttons = LABELS.map((label, index) => {
+    const value = index + 1;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = '★';
+    button.setAttribute('role', 'radio');
+    button.setAttribute('aria-checked', 'false');
+    button.setAttribute('aria-label', `${value} star${value > 1 ? 's' : ''} — ${label}`);
+    button.addEventListener('click', () => choose(value));
+    button.addEventListener('mouseenter', () => paint(value));
+    button.addEventListener('mouseleave', () => paint(rating));
+    $('stars').appendChild(button);
+    return button;
+  });
+
+  function paint(upTo) {
+    buttons.forEach((button, index) => button.classList.toggle('lit', index < upTo));
+  }
+
+  function choose(value) {
+    rating = value;
+    paint(value);
+    buttons.forEach((button, index) => button.setAttribute('aria-checked', String(index + 1 === value)));
+    clearTimeout(redirectTimer);
+    const happy = value >= 4;
+    $('happy').hidden = !happy;
+    $('feedback').hidden = happy;
+    $('public-link').hidden = happy || !CONFIG.publicLinkForAll;
+    if (happy) {
+      redirectTimer = setTimeout(() => window.location.assign(CONFIG.googleReviewUrl), CONFIG.redirectDelayMs);
+    }
+  }
+
+  $('feedback').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const fields = Object.fromEntries(new FormData(form));
+    const done = () => {
+      form.hidden = true;
+      $('thanks').hidden = false;
+      buttons.forEach((button) => (button.disabled = true));
+    };
+    if (fields.company) return done(); // honeypot
+    const submit = form.querySelector('button[type=submit]');
+    submit.disabled = true;
+    $('error').hidden = true;
+    try {
+      const response = await fetch(CONFIG.makeWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'review_feedback',
+          business: CONFIG.businessName,
+          rating,
+          feedback: fields.feedback,
+          name: fields.name,
+          contact: fields.contact,
+          context: new URLSearchParams(window.location.search).get('ref') || '',
+          page_url: window.location.href,
+          submitted_at: new Date().toISOString(),
+        }),
+      });
+      if (!response.ok) throw new Error(String(response.status));
+      done();
+    } catch {
+      submit.disabled = false;
+      $('error').hidden = false;
+    }
+  });
+</script>
+</body>
+</html>

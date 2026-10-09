@@ -1,0 +1,61 @@
+{
+  "status": "draft",
+  "service": "drain-cleaning",
+  "serviceName": "Drain Cleaning",
+  "city": "etobicoke",
+  "cityName": "Etobicoke",
+  "region": "Ontario",
+  "primaryKeyword": "drain cleaning etobicoke",
+  "secondaryKeywords": ["clogged drain etobicoke", "drain unclogging etobicoke", "drain snaking etobicoke"],
+  "title": "Drain Cleaning in Etobicoke | TODO Business Name",
+  "metaDescription": "Drain cleaning in Etobicoke for kitchen, bathroom and main sewer lines. Camera inspection, upfront pricing, same-day visits from Mimico to Rexdale.",
+  "h1": "Drain Cleaning in Etobicoke",
+  "definition": "TODO Business Name clears blocked kitchen, bathroom, floor and main sewer drains for homes and small businesses across Etobicoke, Ontario. Each visit includes a camera inspection of the line, mechanical snaking or hydro-jetting as the blockage requires, and a written report of what was found, with upfront pricing before work starts.",
+  "intro": "TODO two or three sentences in the client's voice: who answers the phone, how fast a truck usually reaches Etobicoke, and what the customer is told before any work begins.",
+  "local": {
+    "landmarks": [
+      { "name": "Sherway Gardens", "context": "the commercial strip along The Queensway nearby is where most of our restaurant grease-line calls come from." },
+      { "name": "Humber Bay Park", "context": "condo towers along the shore here share stacked drain lines, so one unit's blockage often needs building access arranged first." },
+      { "name": "Centennial Park", "context": "the post-war bungalows around it sit on original clay sewer laterals that are now 60 to 70 years old." }
+    ],
+    "crossStreets": ["Bloor St W & Islington Ave", "The Queensway & Kipling Ave"],
+    "neighborhoods": ["Mimico", "New Toronto", "Long Branch", "The Kingsway", "Alderwood", "Markland Wood"],
+    "localNotes": "TODO replace with what the client actually sees on Etobicoke jobs. A strong version covers the age and material of local drains (clay and cast iron in Mimico and New Toronto, newer PVC in infill builds), tree-root intrusion on mature streets such as those in The Kingsway, how spring thaw and heavy summer storms show up in basement floor drains, and which City of Toronto programs or permits apply to backwater valve and sewer lateral work."
+  },
+  "testimonials": [
+    {
+      "quote": "TODO paste the customer's exact words here. Never write a testimonial.",
+      "author": "TODO",
+      "neighborhood": "Mimico",
+      "source": "google",
+      "verified": false
+    }
+  ],
+  "projects": [
+    {
+      "title": "TODO short job title",
+      "neighborhood": "Long Branch",
+      "summary": "TODO a real job in this city: what the customer reported, what the camera showed, what was done, how long it took, and the result. Twenty-five words or more.",
+      "date": "2026-09"
+    }
+  ],
+  "comparison": {
+    "caption": "Which drain cleaning method fits which blockage",
+    "summary": "Snaking suits hair and single-fixture clogs, hydro-jetting suits grease and recurring main-line blockages, and a camera inspection finds the cause but does not clear it.",
+    "columns": ["Method", "Best for", "Typical visit", "Limits"],
+    "rows": [
+      ["Hand or power snaking", "Hair, soap and single-fixture clogs", "30-60 minutes", "Does not clean pipe walls"],
+      ["Hydro-jetting", "Grease, scale and recurring main-line clogs", "1-2 hours", "Not for fragile or collapsed pipe"],
+      ["Camera inspection", "Finding roots, breaks and bellies", "30-45 minutes", "Diagnoses but does not clear"]
+    ]
+  },
+  "faqs": [
+    { "q": "How quickly can you reach Etobicoke?", "a": "TODO answer with the client's real response time and hours." },
+    { "q": "Why do older Etobicoke homes get repeat drain clogs?", "a": "TODO answer from the client's experience with local pipe materials and tree roots." },
+    { "q": "Do I need a permit for sewer lateral work in Toronto?", "a": "TODO confirm the current City of Toronto rule before publishing." },
+    { "q": "What does drain cleaning cost?", "a": "TODO the client's real price range and what changes it." }
+  ],
+  "geo": { "lat": 43.6205, "lng": -79.5132 },
+  "serviceRadiusKm": 12,
+  "updated": "2026-10-09"
+}

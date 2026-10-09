@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "local-seo",
+  "description": "Rank a local business on Google Maps, local search and AI answers: GBP, reviews, posts, keywords, Service x City pages, audit, publish, syndicate.",
+  "owner": {
+    "name": "AfriShield",
+    "email": "hello@afrishieldai.com"
+  },
+  "plugins": [
+    {
+      "name": "local-seo",
+      "source": "./",
+      "skills": [
+        "./skills/local-seo"
+      ],
+      "description": "Local SEO, website generation and GEO suite for local and service-area businesses: Google Business Profile optimisation, review engine, scheduled GBP posts, local keyword clustering, Service x City pages with an anti-doorway gate, local blog posts, technical/GEO audit, GitHub + Vercel publishing and social syndication. Sits beside ai-seo-website-builder (the base site) and city-landing-pages.",
+      "category": "marketing"
+    }
+  ]
+}
