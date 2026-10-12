@@ -10,7 +10,8 @@ Per page
   On-page    title (<= 60), meta description (50-160), exactly one H1, image alt text
   Schema     every JSON-LD block parses; LocalBusiness and Service carry the
              fields that matter; FAQPage questions are visible on the page
-  GEO        a citable definition block after the H1 (40-70 words); H2 sections
+  GEO        a citable definition block in the first two paragraphs after the H1
+             (40-70 words); H2 sections
              that open with a direct answer; lists or tables; body copy present
              without JavaScript
   Links      blog pages link to at least one service page
@@ -272,22 +273,29 @@ def audit_page(url: str, html_text: str, status: int, money_paths: list[str] | N
                 f"{len(entities)} questions, {empty} incomplete, {hidden} not visible on the page")
 
     add("geo", "content without JavaScript", "PASS" if words >= 300 else "FAIL", f"{words} words in the server HTML")
-    after_h1 = None
+    # The definition block is the first paragraph after the H1, or the one right
+    # after it: many layouts put a short hero line under the heading and the
+    # citable summary ("In short", "TL;DR") directly below. Labels under eight
+    # words are skipped, and nothing past the first H2 counts.
+    lead: list[str] = []
     seen_h1 = False
     for tag, block in page.blocks:
         if tag == "h1":
             seen_h1 = True
-        elif seen_h1 and tag == "p":
-            after_h1 = block
-            break
         elif seen_h1 and tag == "h2":
             break
-    if after_h1 is None:
+        elif seen_h1 and tag == "p" and word_count(block) >= 8:
+            lead.append(block)
+            if len(lead) == 2:
+                break
+    if not lead:
         add("geo", "definition block", "FAIL", "no paragraph between the H1 and the first H2")
     else:
-        count = word_count(after_h1)
-        add("geo", "definition block", "PASS" if 40 <= count <= 70 else "WARN",
-            f"{count} words (target 40-70, plain facts, no marketing adjectives)")
+        counts = [word_count(block) for block in lead]
+        hit = next((c for c in counts if 40 <= c <= 70), None)
+        add("geo", "definition block", "PASS" if hit else "WARN",
+            f"{hit or counts[0]} words (target 40-70, plain facts, no marketing adjectives)"
+            + ("" if hit else " - checked the first two paragraphs after the H1"))
 
     sections = direct = 0
     for index, (tag, _) in enumerate(page.blocks):
