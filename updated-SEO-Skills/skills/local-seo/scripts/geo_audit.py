@@ -169,7 +169,39 @@ def types_of(item: dict) -> set[str]:
     return set(kind) if isinstance(kind, list) else {kind}
 
 
-def audit_page(url: str, html_text: str, status: int) -> dict:
+def money_matcher(prefixes: list[str] | None):
+    """Return a test for 'is this path a money page'.
+
+    With no configured prefixes the suite's own layout applies (/services/...,
+    /locations/...). A site built differently lists its money-page paths in
+    business.json (`money_page_paths`) or passes --money-path.
+    """
+    cleaned = ["/" + p.strip().strip("/") for p in (prefixes or []) if p and p.strip().strip("/")]
+    if not cleaned:
+        return (lambda path: bool(re.match(r"^/(services|locations)/[^/]+", path))), "/services/..."
+
+    def test(path: str) -> bool:
+        bare = path.rstrip("/") or "/"
+        return any(bare == prefix or bare.startswith(prefix + "/") for prefix in cleaned)
+
+    return test, ", ".join(cleaned)
+
+
+def configured_money_paths(cli: list[str] | None) -> list[str] | None:
+    if cli:
+        return cli
+    business = Path("local-seo") / "business.json"
+    if business.is_file():
+        try:
+            paths = json.loads(business.read_text(encoding="utf-8")).get("money_page_paths")
+        except (OSError, ValueError):
+            return None
+        if isinstance(paths, list) and paths:
+            return [str(p) for p in paths]
+    return None
+
+
+def audit_page(url: str, html_text: str, status: int, money_paths: list[str] | None = None) -> dict:
     checks: list[dict] = []
 
     def add(area, name, state, detail=""):
@@ -270,7 +302,8 @@ def audit_page(url: str, html_text: str, status: int) -> dict:
             f"{direct} of {sections} H2 sections start with a 12-80 word paragraph")
     add("geo", "lists or tables", "PASS" if (page.tables or page.lists) else "WARN",
         f"{page.tables} tables, {page.lists} lists")
-    is_money = "/services/" in path or "/locations/" in path
+    is_money_path, money_label = money_matcher(money_paths)
+    is_money = is_money_path(path) if money_paths else ("/services/" in path or "/locations/" in path)
     if is_money:
         add("geo", "comparison table", "PASS" if page.tables else "WARN", f"{page.tables} tables")
         add("schema", "FAQPage present", "PASS" if "FAQPage" in found else "FAIL", "")
@@ -278,9 +311,9 @@ def audit_page(url: str, html_text: str, status: int) -> dict:
 
     if "/blog/" in path:
         internal = [urllib.parse.urlparse(urllib.parse.urljoin(url, l)).path for l in page.links]
-        money = sorted({p for p in internal if re.match(r"^/(services|locations)/[^/]+", p)})
+        money = sorted({p for p in internal if is_money_path(p)})
         add("links", "blog links to a service page", "PASS" if money else "FAIL",
-            ", ".join(money[:4]) or "no link to /services/... - this post passes no equity to a money page")
+            ", ".join(money[:4]) or f"no link to {money_label} - this post passes no equity to a money page")
 
     return {"url": url, "checks": checks}
 
@@ -401,12 +434,17 @@ def main(argv=None) -> int:
     parser.add_argument("--psi", action="store_true", help="Run PageSpeed Insights on the first page (public URLs only).")
     parser.add_argument("--lighthouse-json", help="Check a saved Lighthouse JSON report instead.")
     parser.add_argument("--min-score", type=int, default=90)
+    parser.add_argument("--money-path", action="append", default=[],
+                        help="Path prefix of a money page, e.g. pricing or /pricing (omit the leading slash in "
+                             "Git Bash, which rewrites it into a Windows path). Repeatable. Overrides "
+                             "money_page_paths in local-seo/business.json; default /services, /locations.")
     parser.add_argument("--out-dir", default=None)
     args = parser.parse_args(argv)
     if not (args.url or args.site or args.lighthouse_json):
         parser.error("give --url, --site or --lighthouse-json")
     load_env()
 
+    money_paths = configured_money_paths(args.money_path)
     site_checks, urls = [], list(args.url)
     if args.site:
         site_checks, listed = audit_site(args.site, args.max_pages)
@@ -415,7 +453,7 @@ def main(argv=None) -> int:
     pages = []
     for url in urls:
         status, body = http_get(url, headers={"User-Agent": BROWSER_UA})
-        pages.append(audit_page(url, body, status))
+        pages.append(audit_page(url, body, status, money_paths))
 
     lighthouse = []
     if args.lighthouse_json:

@@ -95,7 +95,13 @@ anything that changes.
 
 ### Links
 
-Blog pages must link to at least one `/services/...` page.
+Blog pages must link to at least one money page. By default that means a
+`/services/...` or `/locations/...` path, the layout this suite generates. A site
+built differently lists its own in `money_page_paths` in `business.json` (for
+example `["/pricing", "/solutions"]`) or passes `--money-path pricing` once per
+path (the leading slash is optional - leave it off in Git Bash, which rewrites
+`/pricing` into a Windows path); the money-page checks (FAQPage, comparison table, click-to-call) then apply
+to those paths instead.
 
 ## Reporting
 

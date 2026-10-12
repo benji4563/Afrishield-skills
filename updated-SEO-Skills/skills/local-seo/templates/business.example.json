@@ -33,6 +33,7 @@
     }
   ],
   "service_areas": ["Etobicoke, ON", "Mississauga, ON", "North York, ON"],
+  "money_page_paths": [],
   "competitors": [],
   "gbp": {
     "profile_url": "",
